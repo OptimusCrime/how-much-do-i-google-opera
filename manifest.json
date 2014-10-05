@@ -1,11 +1,11 @@
 {
     "manifest_version": 2,
-    "name": "How Much Do I Google",
+    "name": "How Much Do I Google?",
     "description": "Simple extention that logs how many times you Google something every day.",
     "version": "0.0.1",
     "background": {
         "scripts": [
-            "background.js"
+            "assets/js/background.js"
         ]
     },
     "permissions": [
@@ -16,7 +16,7 @@
     ],
     "browser_action": {
         "default_icon": "icon.png",
-        "default_title": "How Much Do I Google",
+        "default_title": "How Much Do I Google?",
         "default_popup": "popup.html"
     }
 }

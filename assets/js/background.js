@@ -56,6 +56,9 @@ function init() {
     chrome.webNavigation.onReferenceFragmentUpdated.addListener(function (details) {
         analyze_request(details.url);
     });
+    
+    // Update the title
+    update_title();
 }
 
 //
@@ -68,7 +71,6 @@ function analyze_request(req) {
     
     // Split on .
     var req_split = req_clean.split('.');
-    console.log(req_split);
     // Check if url is Google
     if ((req_split.length > 0 && req_split[0]) == 'google' || req_split.length > 1 && req_split[1] == 'google') {
         // Google search, handle request!
@@ -181,11 +183,15 @@ function add_to_data(q) {
     // Populate data
     populate_data(year, month, day);
     
+    // Hashing to avoid storing searches in clear text
+    var shaObj = new jsSHA(q, "TEXT");
+    var hmac = shaObj.getHMAC("lorem ipsum, kebab", "TEXT", "SHA-512", "HEX");
+    
     // Check if already in the stack and more recent that one hour
     var day_arr = data['y' + year]['m' + month]['d' + day];
     if (day_arr.length > 0) {
         for (var i = 0; i < day_arr.length; i++) {
-            if (day_arr[i].query == q) {
+            if (day_arr[i].query == hmac) {
                 if (day_arr[i].time > (new Date().getTime() - (60*60*1000))) {
                     // Already in stack and newer thatn one hour, abooort
                     return;
@@ -194,15 +200,29 @@ function add_to_data(q) {
         }
     }
     
-    // Hashing to avoid storing searches in clear text
-    var shaObj = new jsSHA(q, "TEXT");
-    var hmac = shaObj.getHMAC("lorem ipsum, kebab", "TEXT", "SHA-512", "HEX");
-    
     // Add to data
     data['y' + year]['m' + month]['d' + day].push({query: hmac, time: new Date().getTime()});
         
     // Save
     localStorage.data = JSON.stringify(data);
+    
+    // Update the title
+    update_title();
+}
+
+//
+// Update the title
+//
+
+function update_title() {
+    // Get current date
+    var d = new Date();
+    var year = d.getFullYear();
+    var month = d.getMonth();
+    var day = d.getDate();
+    
+    var searches_num = data['y' + year]['m' + month]['d' + day].length;
+    chrome.browserAction.setTitle({title: 'How Much Do I Google? :: ' + searches_num + ' search' + ((searches_num == 1) ? '' : 'es') + ' today!'});
 }
 
 //
