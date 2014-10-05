@@ -61,7 +61,6 @@ function init() {
     });
     
     var local_data = localStorage.data;
-    console.log(local_data);
     if (local_data !== undefined) {
         data = JSON.parse(local_data);
     }
@@ -185,12 +184,13 @@ function add_to_data(q) {
         }
     }
     
+    // Hashing to avoid storing searches in clear text
+    var shaObj = new jsSHA(q, "TEXT");
+    var hmac = shaObj.getHMAC("lorem ipsum, kebab", "TEXT", "SHA-512", "HEX");
+    
     // Add to data
-    data['y' + year]['m' + month]['d' + day].push({query: q, time: new Date().getTime()});
-    
-    // Debug
-    console.log(data);
-    
+    data['y' + year]['m' + month]['d' + day].push({query: hmac, time: new Date().getTime()});
+        
     // Save
     localStorage.data = JSON.stringify(data);
 }
