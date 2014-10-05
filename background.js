@@ -37,32 +37,42 @@ e[7])}if("SHA-384"===b)a=[e[0].a,e[0].b,e[1].a,e[1].b,e[2].a,e[2].b,e[3].a,e[3].
 var data = {};
 
 //
-// TODO
-//
-
-
-chrome.browserAction.onClicked.addListener(function() {
-    chrome.tabs.query({currentWindow: true, active: true}, function(tab) {
-        chrome.tabs.create( { "url": "http://dev.opera.com" } );
-    });
-});
-
-//
 // Everything starts here
 //
 
 function init() {
-    chrome.webNavigation.onBeforeNavigate.addListener(function (details) {
-        handle_request(details.url);
-    });
-    
-    chrome.webNavigation.onReferenceFragmentUpdated.addListener(function (details) {
-        handle_request(details.url);
-    });
-    
+    // Get local storage data
     var local_data = localStorage.data;
     if (local_data !== undefined) {
         data = JSON.parse(local_data);
+    }
+    
+    // Listener for navigation
+    chrome.webNavigation.onBeforeNavigate.addListener(function (details) {
+        analyze_request(details.url);
+    });
+    
+    // Listener for referencefragment
+    chrome.webNavigation.onReferenceFragmentUpdated.addListener(function (details) {
+        analyze_request(details.url);
+    });
+}
+
+//
+// Makes sure we only handle Google searches
+//
+
+function analyze_request(req) {
+    // Remove http(s) from the url
+    var req_clean = req.replace(/^(https?):\/\//, '');
+    
+    // Split on .
+    var req_split = req_clean.split('.');
+    console.log(req_split);
+    // Check if url is Google
+    if ((req_split.length > 0 && req_split[0]) == 'google' || req_split.length > 1 && req_split[1] == 'google') {
+        // Google search, handle request!
+        handle_request(req);
     }
 }
 
