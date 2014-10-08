@@ -232,7 +232,7 @@ function populate_history_days(year, month) {
             if (today_year == year && today_month == month && today_day == i) {
                 date_text = 'Today';
             }
-            else if (yesterday_year != year && yesterday_month == month && yesterday_day == i) {
+            else if (yesterday_year == year && yesterday_month == month && yesterday_day == i) {
                 date_text = 'Yesterday';
             }
             else {
